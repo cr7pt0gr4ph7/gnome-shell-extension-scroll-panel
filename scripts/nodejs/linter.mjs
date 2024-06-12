@@ -28,7 +28,7 @@ export async function lint(fix) {
         '--resolve-plugins-relative-to', '.',
         './sources/*.js',
     ];
-    
+
     if (fix) {
         eslintArgs.push('--fix');
     }

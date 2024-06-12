@@ -26,11 +26,11 @@ export async function unlinkFile(path) {
         await fs.unlink(path);
     } catch {
         // most probably, there is no such file already
-    }    
+    }
 }
 
 /**
- * @param {string} filePath 
+ * @param {string} filePath
  * @param {https.RequestOptions} request
  */
 export async function downloadFileIfMissed(filePath, request) {
@@ -43,7 +43,7 @@ export async function downloadFileIfMissed(filePath, request) {
 }
 
 /**
- * @param {string} filePath 
+ * @param {string} filePath
  * @param {https.RequestOptions} request
  */
 export async function downloadFile(filePath, request) {
@@ -248,7 +248,7 @@ export class BackgroundProcess {
     kill(signal = 'SIGTERM') {
         this.process.kill(signal);
     }
-    
+
     pid() {
         return this.process.pid;
     }
