@@ -2,21 +2,27 @@
 // This module is for debug purposes only and may use some hacks. It's content
 // is expected to be erased from release build and should be used only inside
 // try-catch blocks or with null coalescing operators.
-import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
-
-const Me = Extension.lookupByURL(import.meta.url);
 
 /**
  * Debug class module.
  */
 export const Debug = new class DebugModule {
     /**
+     * Sets the extension object used for metadata retrieval.
+     *
+     * @param {object} extension - Extension object.
+     */
+    setExtensionObject(extension) {
+        this.extension = extension;
+    }
+
+    /**
      * Log verbose message.
      *
      * @param {string} message - Message to log.
      */
     logDebug(message) {
-        console.debug(`[${Me.metadata.uuid}][DBG] ${message}`);
+        console.debug(`[${this.extension?.uuid}][DBG] ${message}`);
     }
 
     /**
@@ -25,7 +31,7 @@ export const Debug = new class DebugModule {
      * @param {string} message - Message to log.
      */
     logStep(message) {
-        console.debug(`[${Me.metadata.uuid}][STP] ${message}`);
+        console.debug(`[${this.extension?.uuid}][STP] ${message}`);
     }
 
     /**

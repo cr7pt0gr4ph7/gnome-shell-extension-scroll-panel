@@ -115,6 +115,8 @@ export default class ExtensionModule extends Extension {
     constructor(metadata) {
         super(metadata);
 
+        Debug?.setExtensionObject(this);
+
         /** @type {function()[]} */
         this._signalDisconnectors = [];
 
