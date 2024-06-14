@@ -16,7 +16,16 @@ var module = new class DebugModule {
      * @param {string} message - Message to log.
      */
     logDebug(message) {
-        log(`[${Me.metadata.uuid}][DBG] ${message}`);
+        console.debug(`[${Me.metadata.uuid}][DBG] ${message}`);
+    }
+
+    /**
+     * Log a method stepping message.
+     *
+     * @param {string} message - Message to log.
+     */
+    logStep(message) {
+        console.debug(`[${Me.metadata.uuid}][STP] ${message}`);
     }
 
     /**
@@ -61,7 +70,7 @@ var module = new class DebugModule {
                     }
                 }
             } catch (e) {
-                log(`[${Me.metadata.uuid}][STP] Loading module '${moduleName}' problem:\n${e}`);
+                this.logStep(`Loading module '${moduleName}' problem:\n${e}`);
             }
         }
     }
@@ -81,7 +90,7 @@ var module = new class DebugModule {
             return;
         }
         const debug = this;
-        log(`[${Me.metadata.uuid}][STP] Symbol '${symbolName}' found in module '${moduleName}', patching constructor...`);
+        this.logStep(`Symbol '${symbolName}' found in module '${moduleName}', patching constructor...`);
         modules[moduleName][symbolName] = function (...args) {
             if (new.target) {
                 const instance = new constructor(...args);
@@ -104,7 +113,7 @@ var module = new class DebugModule {
      * @param {string} symbolName - Object name.
      */
     injectObjectTraceLogs(instance, moduleName, symbolName) {
-        log(`[${Me.metadata.uuid}][STP] Instance of class '${symbolName}' from module '${moduleName}' spawned, patching...`);
+        this.logStep(`Instance of class '${symbolName}' from module '${moduleName}' spawned, patching...`);
         if (instance === this) {
             return;
         }
@@ -116,13 +125,14 @@ var module = new class DebugModule {
             if (typeof member !== 'function' || member.objectTraceLogger) {
                 continue;
             }
+            const debug = this;
             const memberFullName = `${moduleName}.${symbolName}.${memberName}`;
-            log(`[${Me.metadata.uuid}][STP] Patching '${memberFullName}'...`);
+            this.logStep(`Patching '${memberFullName}'...`);
             instance[memberName] = (...args) => {
                 const memberCall = `${memberFullName}(${args.map(r => this._toShortString(r))})`;
-                log(`[${Me.metadata.uuid}][STP] -> ${memberCall}`);
+                debug.logStep(`-> ${memberCall}`);
                 const r = member.bind(instance)(...args);
-                log(`[${Me.metadata.uuid}][STP] <- ${memberCall}: ${this._toShortString(r)}`);
+                debug.logStep(`<- ${memberCall}: ${this._toShortString(r)}`);
                 return r;
             };
             instance[memberName].objectTraceLogger = this;
