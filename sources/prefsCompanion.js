@@ -1,8 +1,9 @@
-/* exported PrefsCompanion */
-
-const {Clutter, Cogl, GObject, St} = imports.gi;
-const {main: Main} = imports.ui;
-const Me = imports.misc.extensionUtils.getCurrentExtension();
+import Clutter from 'gi://Clutter';
+import Cogl from 'gi://Cogl';
+import GObject from 'gi://GObject';
+import St from 'gi://St';
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
 /**
  * Log prefs warning message.
@@ -10,9 +11,9 @@ const Me = imports.misc.extensionUtils.getCurrentExtension();
  * @param {string} message - Message to log.
  */
 function _logWarning(message) {
-    log(`[${Me.metadata.uuid}][WRN] ${message}`);
+    const me = Extension.lookupByURL(import.meta.url);
+    console.warn(`[${me?.uuid}][WRN] ${message}`);
 }
-
 /**
  * Red border highlight effect for {@link Clutter} actors.
  * Based on Gnome Shell Looking Glass, you can find it at
@@ -99,9 +100,9 @@ const ActorPicker = GObject.registerClass(
  * Prefs widget shell-space companion.
  * Used for interaction of prefs widget with Gnome Shell scene elements.
  */
-var PrefsCompanion = class _PrefsCompanion {
+export class PrefsCompanion {
     /**
-     * @param {_PrefsSource} prefsSource - Prefs source instance to use.
+     * @param {PrefsSource} prefsSource - Prefs source instance to use.
      */
     constructor(prefsSource) {
         this._prefsSource = prefsSource;
@@ -289,4 +290,4 @@ var PrefsCompanion = class _PrefsCompanion {
 
         this._prefsSource.highlightPath.value = [];
     }
-};
+}

@@ -1,6 +1,7 @@
-/* exported PrefsSource */
+import Gio from 'gi://Gio';
+import GObject from 'gi://GObject';
+import {Debug} from './debug.js';
 
-const {Gio, GObject} = imports.gi;
 // WARNING: No shell or extension imports allowed here or in class constructors
 // since it will break buildPrefsView() call for development environment.
 
@@ -39,19 +40,10 @@ var Setting = GObject.registerClass(
          * to cleanup resources when setting is not needed anymore.
          */
         trackChanges() {
-            /** @type {DebugModule|null} */
-            let debug = null;
-            try {
-                const extension = imports.misc.extensionUtils.getCurrentExtension();
-                debug = extension.imports.debug?.module;
-            } catch {
-                // Debug module is optional.
-            }
-
             return this.onChange(() => {
                 /** @type {T} */
                 this._value = this._getter();
-                debug?.logDebug(`Setting ${this.key} set to: ${this._value}`);
+                Debug?.logDebug(`Setting ${this.key} set to: ${this._value}`);
             });
         }
 
@@ -91,7 +83,7 @@ var Setting = GObject.registerClass(
     }
 );
 
-var PrefsSource = class _PrefsSource {
+export class PrefsSource {
     /**
      * @param {object} extension - Extension object to create prefs source for.
      */
@@ -381,4 +373,4 @@ var PrefsSource = class _PrefsSource {
             this.switcherVisualize,
         ];
     }
-};
+}

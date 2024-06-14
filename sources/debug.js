@@ -1,15 +1,15 @@
-/* exported module */
 // noinspection JSUnfilteredForInLoop
 // This module is for debug purposes only and may use some hacks. It's content
 // is expected to be erased from release build and should be used only inside
 // try-catch blocks or with null coalescing operators.
+import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
-const Me = imports.misc.extensionUtils.getCurrentExtension();
+const Me = Extension.lookupByURL(import.meta.url);
 
 /**
  * Debug class module.
  */
-var module = new class DebugModule {
+export const Debug = new class DebugModule {
     /**
      * Log verbose message.
      *

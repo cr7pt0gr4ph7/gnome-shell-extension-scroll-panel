@@ -1,7 +1,10 @@
-const { Adw, Gio, GLib, GObject } = imports.gi;
-const ByteArray = imports.byteArray;
+import Adw from 'gi://Adw'
+import Gio from 'gi://Gio'
+import GLib from 'gi://GLib'
+import GObject from 'gi://GObject'
+const ByteArray = imports.byteArray; // legacy module without ESM equivalent
 
-var UiPreview = GObject.registerClass(class extends imports.gi.Adw.Application {
+var UiPreview = GObject.registerClass(class extends Adw.Application {
     /**
      * @param {string} buildDirPath
      * @param {string} uiFileName

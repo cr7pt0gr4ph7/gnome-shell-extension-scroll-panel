@@ -1,8 +1,8 @@
-/* exported init, buildPrefsWidget, UiBuilder */
-
-const {Gtk} = imports.gi;
-// WARNING: No shell or extension imports allowed here or in class constructors
-// since it will break buildPrefsView() call for development environment.
+import Gtk from 'gi://Gtk';
+import Adw from 'gi://Adw';
+import {ExtensionPreferences, gettext as gettextGlobal} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
+import {PrefsSource} from './prefsSource.js';
+import {Debug} from './debug.js';
 
 /**
  * Prefs widget tabs.
@@ -97,7 +97,7 @@ class PrefsTab {
     }
 }
 
-var UiBuilder = class _UiBuilder {
+class UiBuilder {
     /**
      * @param {object} extension - Extension object to build prefs widget for.
      */
@@ -106,7 +106,7 @@ var UiBuilder = class _UiBuilder {
         this._builder = Gtk.Builder.new_from_file(
             `${extension.dir.get_path()}/prefs.ui`
         );
-        this._prefsSource = new extension.imports.prefsSource.PrefsSource(
+        this._prefsSource = new PrefsSource(
             extension
         );
 
@@ -458,7 +458,7 @@ var UiBuilder = class _UiBuilder {
         });
 
         const box = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL});
-        box.append(new imports.gi.Adw.HeaderBar());
+        box.append(new Adw.HeaderBar());
         box.append(this._widget);
         return box;
     }
@@ -537,11 +537,9 @@ var UiBuilder = class _UiBuilder {
      * %s and %1$s notations should not be mixed.
      */
     _gettext() {
-        const gettext = imports.gettext;
-        const gettextDomain = gettext.domain(this._metadata['gettext-domain']);
         return (message, ...args) => {
-            let iter = 0;
-            return gettextDomain.gettext(message)
+            var iter = 0;
+            return gettextGlobal(message)
                 .replaceAll(
                     /%(?:%|([1-9][0-9]*\$)?s)/g,
                     (q, i) => q === '%%' ? '%' : args[i ? parseInt(i) - 1 : iter++]
@@ -554,31 +552,14 @@ var UiBuilder = class _UiBuilder {
         this._prefsChangeDisposers.forEach(c => c());
         this._prefsChangeDisposers = [];
     }
-};
+}
 
-/**
- * Initialize preferences submodule.
- */
-function init() {
-    try {
-        const extension = imports.misc.extensionUtils.getCurrentExtension();
-        /** @type {DebugModule} */
-        const Debug = extension.imports.debug.module;
-        Debug.logDebug('Initializing prefs widget...');
-        Debug.injectModulesTraceLogs(extension.imports);
-    } catch {
-        // Debug module is optional.
+export default class MyExtensionPreferences extends ExtensionPreferences {
+    getPreferencesWidget() {
+        return new UiBuilder(this).bindPrefs();
     }
-    imports.misc.extensionUtils.initTranslations();
 }
 
-/**
- * Build extension preferences widget with {@link UiBuilder.bindPrefs()}.
- *
- * @returns {Gtk.Widget} - The preferences widget.
- */
-function buildPrefsWidget() {
-    const extension = imports.misc.extensionUtils.getCurrentExtension();
-    const uiBuilder = new UiBuilder(extension);
-    return uiBuilder.bindPrefs();
-}
+Debug?.logDebug('Initializing prefs widget...');
+// TODO: Figure out a way to port this over to ES modules
+// Debug?.injectModulesTraceLogs(Me.imports);

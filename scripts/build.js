@@ -249,7 +249,7 @@ if (args['install']) {
 async function copyBuildFiles(targetDirPath, baseDirPath, sourcesDirName = undefined) {
     if (!args['debug']) {
         await fs.mkdir(targetDirPath, { recursive: true });
-        await fs.writeFile(`${targetDirPath}/debug.js`, '');
+        await fs.writeFile(`${targetDirPath}/debug.js`, 'export const Debug = null;');
     }
     await copyFiles(
         `${baseDirPath}/${sourcesDirName ?? '.'}`,

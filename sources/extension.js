@@ -1,18 +1,18 @@
-/* exported init */
-
-const {Clutter, GLib, Meta} = imports.gi;
-const Main = imports.ui.main;
-const WorkspaceSwitcherPopup = imports.ui.workspaceSwitcherPopup;
-const Me = imports.misc.extensionUtils.getCurrentExtension();
-// WARNING: No extension imports allowed here since it will break method calls
-// tracing in development environment.
-
-/** @type {DebugModule|null} */
-const Debug = Me.imports.debug?.module;
+import Clutter from 'gi://Clutter';
+import GLib from 'gi://GLib';
+import Meta from 'gi://Meta';
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as WorkspaceSwitcherPopup from 'resource:///org/gnome/shell/ui/workspaceSwitcherPopup.js';
+import * as GnomeShellConfig from 'resource:///org/gnome/shell/misc/config.js';
+import {WindowSwitcherPopup} from './windowSwitcher.js';
+import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
+import {PrefsSource} from './prefsSource.js';
+import {PrefsCompanion} from './prefsCompanion.js';
+import {Debug} from './debug.js';
 
 class ActorScrollHandler {
     /**
-     * @param {_PrefsSource} prefsSource - {@link PrefsSource} instance.
+     * @param {PrefsSource} prefsSource - {@link PrefsSource} instance.
      * @param {string} action - Action identifier from {@link PrefsSource}.
      * @param {function(number): boolean} onSwitch - Callback for switch action.
      * The only argument is switching distance (-N for left, +N for right).
@@ -111,10 +111,9 @@ class ActorScrollHandler {
     }
 }
 
-class ExtensionModule {
-    constructor() {
-        /** @type {_WindowSwitcherPopup.constructor} */
-        this.WindowSwitcherPopup = Me.imports.windowSwitcher.WindowSwitcherPopup;
+export default class ExtensionModule extends Extension {
+    constructor(metadata) {
+        super(metadata);
 
         /** @type {function()[]} */
         this._signalDisconnectors = [];
@@ -133,10 +132,10 @@ class ExtensionModule {
     }
 
     enable() {
-        /** @type {_PrefsSource} */
-        this._prefsSource = new Me.imports.prefsSource.PrefsSource(Me);
-        /** @type {_PrefsCompanion} */
-        this._prefsCompanion = new Me.imports.prefsCompanion.PrefsCompanion(
+        /** @type {PrefsSource} */
+        this._prefsSource = new PrefsSource(this);
+        /** @type {PrefsCompanion} */
+        this._prefsCompanion = new PrefsCompanion(
             this._prefsSource
         );
 
@@ -249,7 +248,7 @@ class ExtensionModule {
         // TODO: do not show popup when Main.overview.visible is true?
         if (visualize) {
             if (!this._windowSwitcherPopup?.tryDisplay(index, 1.5 * timeout)) {
-                this._windowSwitcherPopup = new this.WindowSwitcherPopup(windows);
+                this._windowSwitcherPopup = new WindowSwitcherPopup(windows);
                 this._windowSwitcherPopup.connect('destroy', () => {
                     const selectIndex = this._windowSwitcherPopup.selectedIndex;
                     windows[selectIndex].activate(global.get_current_time());
@@ -300,7 +299,7 @@ class ExtensionModule {
             });
         }
 
-        const displayWorkspacesSwitcherPopup = imports.misc.config.PACKAGE_VERSION >= '42'
+        const displayWorkspacesSwitcherPopup = GnomeShellConfig.PACKAGE_VERSION >= '42'
             ? (_, ind) => this._workspacesSwitcherPopup?.display(ind)
             : (dir, ind) => this._workspacesSwitcherPopup?.display(dir, ind);
         if (distance < 0) {
@@ -324,13 +323,6 @@ class ExtensionModule {
     }
 }
 
-/**
- * Construct the extension main module instance.
- *
- * @returns {ExtensionModule} - Extension main module.
- */
-function init() {
-    Debug?.logDebug('Initializing shell extension...');
-    Debug?.injectModulesTraceLogs(Me.imports);
-    return new ExtensionModule();
-}
+Debug?.logDebug('Initializing shell extension...');
+// TODO: Figure out a way to port this over to ES modules
+// Debug?.injectModulesTraceLogs(Me.imports);
