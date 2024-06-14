@@ -3,7 +3,6 @@ import GLib from 'gi://GLib';
 import Meta from 'gi://Meta';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as WorkspaceSwitcherPopup from 'resource:///org/gnome/shell/ui/workspaceSwitcherPopup.js';
-import * as GnomeShellConfig from 'resource:///org/gnome/shell/misc/config.js';
 import {WindowSwitcherPopup} from './windowSwitcher.js';
 import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 import {PrefsSource} from './prefsSource.js';
@@ -301,21 +300,18 @@ export default class ExtensionModule extends Extension {
             });
         }
 
-        const displayWorkspacesSwitcherPopup = GnomeShellConfig.PACKAGE_VERSION >= '42'
-            ? (_, ind) => this._workspacesSwitcherPopup?.display(ind)
-            : (dir, ind) => this._workspacesSwitcherPopup?.display(dir, ind);
         if (distance < 0) {
             // such that `modBallast > abs(distance) && modBallast % count == 0`
             const modBallast = Math.abs(distance) * count;
             index = cycle
                 ? (index + distance + modBallast) % count
                 : Math.max(0, index + distance);
-            displayWorkspacesSwitcherPopup(Meta.MotionDirection.LEFT, index);
+            this._workspacesSwitcherPopup?.display(index);
         } else {
             index = cycle
                 ? (index + distance) % count
                 : Math.min(index + distance, count - 1);
-            displayWorkspacesSwitcherPopup(Meta.MotionDirection.RIGHT, index);
+            this._workspacesSwitcherPopup?.display(index);
         }
 
         global.workspaceManager
